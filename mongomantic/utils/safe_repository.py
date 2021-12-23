@@ -3,10 +3,10 @@
 
 from typing import Dict, Iterator, List, Type
 
-from db.config import logger
-from db.core.base_repository import BaseRepository
-from db.core.errors import DoesNotExistError, InvalidQueryError, MultipleObjectsReturnedError, WriteError
-from db.core.mongo_model import MongoDBModel
+from mongomantic.config import logger
+from mongomantic.core.base_repository import BaseRepository
+from mongomantic.core.errors import DoesNotExistError, InvalidQueryError, MultipleObjectsReturnedError, WriteError
+from mongomantic.core.mongo_model import MongoDBModel
 
 
 class SafeRepository(BaseRepository):

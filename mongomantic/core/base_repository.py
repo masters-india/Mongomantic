@@ -4,7 +4,7 @@ from abc import ABCMeta
 
 from bson import ObjectId
 from bson.objectid import InvalidId
-from db.core.index import Index
+from mongomantic.core.index import Index
 from pymongo.collection import Collection
 
 from .database import MongomanticClient
