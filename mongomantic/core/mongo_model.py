@@ -1,3 +1,5 @@
+import json
+
 from typing import Any, Dict, Optional, Type
 
 from abc import ABC
@@ -39,6 +41,12 @@ class MongoDBModel(BaseModel, ABC):
             return None
 
         id = data.pop("_id", None)  # Convert _id into id
+        for k, v in cls.__fields__.items():
+            fields_data = str(v).split(" ")
+            for e in fields_data:
+                if "Optional[Any]".lower() in e.lower() and "type" in e.lower():
+                    if k in data and data[k]:
+                        data[k] = json.dumps(data[k])
         return cls(**dict(data, id=id))
 
     def to_mongo(self, **kwargs):
@@ -67,6 +75,8 @@ class MongoDBModel(BaseModel, ABC):
 
     def dict(self, **kwargs):
         """Override self.dict to hide some fields that are used as metadata"""
+
         hidden_fields = {"_collection"}
         kwargs.setdefault("exclude", hidden_fields)
         return super().dict(**kwargs)
+

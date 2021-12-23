@@ -4,7 +4,7 @@ from abc import ABCMeta
 
 from bson import ObjectId
 from bson.objectid import InvalidId
-from mongomantic.core.index import Index
+from db.core.index import Index
 from pymongo.collection import Collection
 
 from .database import MongomanticClient
@@ -56,6 +56,20 @@ class BaseRepository(metaclass=ABRepositoryMeta):
             raise NotImplementedError
 
     @classmethod
+    def save_single_to_db(cls, data) -> Type[MongoDBModel]:
+        data = cls.Meta.model(**data)
+        data = cls.save(data)
+        return data
+
+    @classmethod
+    def save_many_to_db(cls, data) -> Type[List]:
+        data_final = list()
+        for each in data:
+            data_final.append(cls.Meta.model(**each))
+        data = cls.save_many(data_final)
+        return data
+
+    @classmethod
     def _get_collection(cls) -> Collection:
         """Returns a reference to the MongoDB collection, and initializes indexes if first time"""
         if not hasattr(cls, "_indexes") or cls._indexes is None:
@@ -92,10 +106,22 @@ class BaseRepository(metaclass=ABRepositoryMeta):
         limit = kwargs.pop("limit", 0)
 
         for key in kwargs:
-            if key not in cls.Meta.model.__fields__:
+            if key != "_id" and key not in cls.Meta.model.__fields__:
                 raise FieldDoesNotExistError(f"Field {key} does not exist for model {cls.Meta.model}")
 
         return projection, skip, limit
+
+    @classmethod
+    def _process_ID(cls, data) -> dict:
+        """Update keyword arguments from human readable to mongo specific"""
+        if "id" in data:
+            try:
+                oid = str(data.pop("id"))
+                oid = ObjectId(oid)
+                data["_id"] = oid
+            except InvalidId:
+                raise InvalidQueryError(f"Invalid ObjectId {oid}.")
+        return data
 
     @classmethod
     def save(cls, model) -> Type[MongoDBModel]:
@@ -108,6 +134,37 @@ class BaseRepository(metaclass=ABRepositoryMeta):
 
         document["_id"] = res.inserted_id
         return cls.Meta.model.from_mongo(document)
+
+    @classmethod
+    def save_many(cls, models) -> Type[List]:
+        """Saves object in MongoDB"""
+        result = list()
+        try:
+            document = list()
+            for each in models:
+                document.append(each.to_mongo())
+            res = cls._get_collection().insert_many(document)
+            for each in document:
+                result.append(cls.Meta.model.from_mongo(each))
+        except Exception as e:
+            raise WriteError(f"Error inserting document: \n{e}")
+
+        return result
+
+
+    @classmethod
+    def update_one(cls,filter_query, update) -> bool:
+        """Saves object in MongoDB"""
+        try:
+            cls._process_kwargs(filter_query)
+            cls._process_kwargs(update)
+            filter_query = cls._process_ID(filter_query)
+            update = {"$set": update}
+            res = cls._get_collection().update_one(filter_query, update)
+            return True
+        except Exception as e:
+            raise WriteError(f"Error updating document: \n{e}")
+        return False
 
     @classmethod
     def get(cls, **kwargs) -> Type[MongoDBModel]:

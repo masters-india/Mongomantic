@@ -2,6 +2,7 @@
 from pymongo import MongoClient
 from pymongo.database import Database
 
+
 __all__ = ["MongomanticClient"]
 
 
