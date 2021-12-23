@@ -586,7 +586,7 @@ toml = ">=0.7.1"
 
 [[package]]
 name = "pymongo"
-version = "3.11.3"
+version = "4.0.1"
 description = "Python driver for MongoDB <http://www.mongodb.org>"
 category = "main"
 optional = false
