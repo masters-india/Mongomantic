@@ -13,9 +13,9 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 
-from db.core.base_repository import BaseRepository
-from db.core.database import connect, disconnect
-from db.core.index import Index
-from db.core.mongo_model import MongoDBModel
+from mongomantic.core.base_repository import BaseRepository
+from mongomantic.core.database import connect, disconnect
+from mongomantic.core.index import Index
+from mongomantic.core.mongo_model import MongoDBModel
 
 __all__ = ["BaseRepository", "MongoDBModel", "connect", "disconnect", "Index"]
