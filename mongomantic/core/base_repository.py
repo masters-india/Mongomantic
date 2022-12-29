@@ -275,7 +275,7 @@ class BaseRepository(metaclass=ABRepositoryMeta):
                     defaults.pop('id')
                 if "_id" in defaults:
                     defaults.pop('_id')
-                createObj = cls.Meta.model.from_mongo({**defaults, **kwargs})
+                createObj = cls.Meta.model.from_mongo({**kwargs, **defaults})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
         except Exception as e:
@@ -297,7 +297,7 @@ class BaseRepository(metaclass=ABRepositoryMeta):
                     defaults.pop('id')
                 if "_id" in defaults:
                     defaults.pop('_id')
-                createObj = cls.Meta.model.from_mongo({**defaults, **kwargs})
+                createObj = cls.Meta.model.from_mongo({**kwargs, **defaults})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
         except Exception as e:
