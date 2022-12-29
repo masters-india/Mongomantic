@@ -264,40 +264,40 @@ class BaseRepository(metaclass=ABRepositoryMeta):
             raise InvalidQueryError(f"Error executing pipeline: {e}")
     
     @classmethod
-    def get_or_create(cls, default = None, **kwargs):
+    def get_or_create(cls, defaults = None, **kwargs):
         defaults = defaults or {}
         cls._process_kwargs(kwargs)
         try:
             try:
                 return cls.get(**kwargs), False
             except DoesNotExistError:
-                if "id" in default:
-                    default.pop('id')
-                if "_id" in default:
-                    default.pop('_id')
-                createObj = cls.Meta.model.from_mongo({**default, **kwargs})
+                if "id" in defaults:
+                    defaults.pop('id')
+                if "_id" in defaults:
+                    defaults.pop('_id')
+                createObj = cls.Meta.model.from_mongo({**defaults, **kwargs})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
         except Exception as e:
             raise InvalidQueryError(f"Error executing pipeline: {e}")
     
     @classmethod
-    def create_or_update(cls, default = None, **kwargs):
+    def create_or_update(cls, defaults = None, **kwargs):
         defaults = defaults or {}
         cls._process_kwargs(kwargs)
         try:
             try:
                 data = cls.get(**kwargs)
-                if 'created' in default:
-                    default.pop('created')
-                cls.update_one({"_id": data.id}, {**default})
-                return cls.Meta.model.from_mongo({**data.dict(), **default, "_id": data.id}), False
+                if 'created' in defaults:
+                    defaults.pop('created')
+                cls.update_one({"_id": data.id}, {**defaults})
+                return cls.Meta.model.from_mongo({**data.dict(), **defaults, "_id": data.id}), False
             except DoesNotExistError:
-                if "id" in default:
-                    default.pop('id')
-                if "_id" in default:
-                    default.pop('_id')
-                createObj = cls.Meta.model.from_mongo({**default, **kwargs})
+                if "id" in defaults:
+                    defaults.pop('id')
+                if "_id" in defaults:
+                    defaults.pop('_id')
+                createObj = cls.Meta.model.from_mongo({**defaults, **kwargs})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
         except Exception as e:
