@@ -226,6 +226,15 @@ class BaseRepository(metaclass=ABRepositoryMeta):
                 yield cls.Meta.model.from_mongo(result)
         except Exception as e:
             raise InvalidQueryError(f"Invalid argument types: {e}")
+    
+    @classmethod
+    def fine_one(cls, **kwargs):
+        cls._process_kwargs(kwargs)
+        try:
+            res = cls._get_collection().find_one(filter=kwargs)
+            return res
+        except Exception as e:
+            raise InvalidQueryError(f"Error executing pipeline: {e}")
 
     @classmethod
     def aggregate(cls, pipeline: List[Dict]):
