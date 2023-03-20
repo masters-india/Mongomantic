@@ -228,7 +228,7 @@ class BaseRepository(metaclass=ABRepositoryMeta):
             raise InvalidQueryError(f"Invalid argument types: {e}")
     
     @classmethod
-    def fine_one(cls, **kwargs):
+    def find_one(cls, **kwargs):
         cls._process_kwargs(kwargs)
         try:
             res = cls._get_collection().find_one(filter=kwargs)
