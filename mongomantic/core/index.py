@@ -25,15 +25,7 @@ class Index(BaseModel):
     )
 
     background: Optional[bool] = Field(
-        default=False, description="If True, this index should be created in the background."
-    )
-
-    # Used to create an expiring (TTL) collection.
-    # MongoDB will automatically delete documents from this collection after <int> seconds.
-    # The indexed field must be a UTC datetime or the data will not expire.
-    expire_after_seconds: Optional[int] = Field(
-        default=0,
-        description="Used to create an expiring (TTL) collection. Documents automatically deleted after <int> seconds.",
+        default=True, description="If True, this index should be created in the background."
     )
 
     def to_pymongo(self):
@@ -58,5 +50,4 @@ class Index(BaseModel):
             unique=self.unique,
             background=self.background,
             sparse=self.sparse,
-            expireAfterSeconds=self.expire_after_seconds,
         )
