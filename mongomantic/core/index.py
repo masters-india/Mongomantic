@@ -25,7 +25,7 @@ class Index(BaseModel):
     )
 
     background: Optional[bool] = Field(
-        default=True, description="If True, this index should be created in the background."
+        default=False, description="If True, this index should be created in the background."
     )
 
     def to_pymongo(self):
