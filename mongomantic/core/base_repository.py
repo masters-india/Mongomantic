@@ -82,13 +82,22 @@ class BaseRepository(metaclass=ABRepositoryMeta):
 
     @classmethod
     def _create_indexes(cls):
-        indexes = getattr(cls.Meta, "indexes", False)
+        indexes: List[Index] = getattr(cls.Meta, "indexes", False)
         if indexes:
             try:
-                pymongo_indexes = [index.to_pymongo() for index in indexes]
+                existing_indexes = cls._get_collection().index_information()
+                pymongo_indexes = []
+                for index in indexes:
+                    index_py = index.to_pymongo(existing_indexes)
+                    if index_py:
+                        pymongo_indexes.append(index_py)
+                if len(pymongo_indexes) == 0:
+                    # print("No indexes to create.", cls.Meta.collection)
+                    return
                 cls._get_collection().create_indexes(pymongo_indexes)
             except Exception as e:
-                raise IndexCreationError(f"Failed to create indexes: {e}")
+                message = str(e)
+                raise IndexCreationError(f"Error creating index: {message}")
 
     @classmethod
     def _process_kwargs(cls, kwargs: Dict) -> Tuple:
@@ -151,9 +160,8 @@ class BaseRepository(metaclass=ABRepositoryMeta):
 
         return result
 
-
     @classmethod
-    def update_one(cls,filter_query, update) -> bool:
+    def update_one(cls, filter_query, update) -> bool:
         """Saves object in MongoDB"""
         try:
             cls._process_kwargs(filter_query)
@@ -226,7 +234,7 @@ class BaseRepository(metaclass=ABRepositoryMeta):
                 yield cls.Meta.model.from_mongo(result)
         except Exception as e:
             raise InvalidQueryError(f"Invalid argument types: {e}")
-    
+
     @classmethod
     def find_one(cls, **kwargs):
         cls._process_kwargs(kwargs)
@@ -271,9 +279,9 @@ class BaseRepository(metaclass=ABRepositoryMeta):
             return count
         except Exception as e:
             raise InvalidQueryError(f"Error executing pipeline: {e}")
-    
+
     @classmethod
-    def get_or_create(cls, defaults = None, **kwargs):
+    def get_or_create(cls, defaults=None, **kwargs):
         defaults = defaults or {}
         cls._process_kwargs(kwargs)
         try:
@@ -281,31 +289,31 @@ class BaseRepository(metaclass=ABRepositoryMeta):
                 return cls.get(**kwargs), False
             except DoesNotExistError:
                 if "id" in defaults:
-                    defaults.pop('id')
+                    defaults.pop("id")
                 if "_id" in defaults:
-                    defaults.pop('_id')
+                    defaults.pop("_id")
                 createObj = cls.Meta.model.from_mongo({**kwargs, **defaults})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
         except Exception as e:
             raise InvalidQueryError(f"Error executing pipeline: {e}")
-    
+
     @classmethod
-    def create_or_update(cls, defaults = None, **kwargs):
+    def create_or_update(cls, defaults=None, **kwargs):
         defaults = defaults or {}
         cls._process_kwargs(kwargs)
         try:
             try:
                 data = cls.get(**kwargs)
-                if 'created' in defaults:
-                    defaults.pop('created')
+                if "created" in defaults:
+                    defaults.pop("created")
                 cls.update_one({"_id": data.id}, {**defaults})
                 return cls.Meta.model.from_mongo({**data.dict(), **defaults, "_id": data.id}), False
             except DoesNotExistError:
                 if "id" in defaults:
-                    defaults.pop('id')
+                    defaults.pop("id")
                 if "_id" in defaults:
-                    defaults.pop('_id')
+                    defaults.pop("_id")
                 createObj = cls.Meta.model.from_mongo({**kwargs, **defaults})
                 createdDoc = cls.save(createObj)
                 return createdDoc, True
