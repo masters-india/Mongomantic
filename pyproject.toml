@@ -6,21 +6,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mongomantic"
-version = "0.4.4"
+version = "2.0.0"
 description = "A MongoDB Python ORM, built on Pydantic and PyMongo."
 readme = "README.md"
-authors = [
-  "mongomantic <rami@hyperchess.com>"
-]
+authors = ["mongomantic <anujsingh@mastersindia.co>"]
 license = "MIT"
-repository = "https://github.com/RamiAwar/mongomantic"
-homepage = "https://github.com/RamiAwar/mongomantic"
+repository = "https://github.com/masters-india/Mongomantic"
+homepage = "https://github.com/masters-india/Mongomantic"
 
 # Keywords description https://python-poetry.org/docs/pyproject/#keywords
-keywords = []  # Update me
+keywords = [] # Update me
 
 # Pypi classifiers: https://pypi.org/classifiers/
-classifiers = [  # Update me
+classifiers = [ # Update me
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
@@ -33,10 +31,9 @@ classifiers = [  # Update me
 
 [tool.poetry.dependencies]
 python = "^3.7"
-importlib_metadata = {version = ">=1.6,<5.0", python = "<3.8"}
+importlib_metadata = { version = ">=1.6,<5.0", python = "<3.8" }
 rich = "^9.8.2"
-# bson = "^0.5.10"
-pydantic = "^1.8.1"
+pydantic = "^2.8.1"
 pymongo = "^3.12.3"
 requests = "^2.25.1"
 wily = "^1.19.0"

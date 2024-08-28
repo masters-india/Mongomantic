@@ -14,25 +14,37 @@ def getIndexNameFromError(error_message):
 class Index(BaseModel):
     name: Optional[str] = Field(
         default=None,
-        description="Custom name to use for this index - if none is given, a name will be generated.",
+        json_schema_extra={
+            "description": "Custom name to use for this index - if none is given, a name will be generated.",
+        },
     )
 
     fields: List[str] = Field(
-        min_items=1,
-        description=(
-            "Fields to index. Can be prefixed with '+' or '-' to specify index direction as ascending"
-            "or descending. Prefix with '$' to specify text index."
-        ),
+        min_length=1,
+        json_schema_extra={
+            "description": "Fields to index. Can be prefixed with '+' or '-' to specify index direction as ascending or descending. Prefix with '$' to specify text index.",
+        },
     )
 
-    unique: Optional[bool] = Field(default=False, descrition="If True, creates a uniqueness constraint on the index.")
+    unique: Optional[bool] = Field(
+        default=False,
+        json_schema_extra={
+            "description": "If True, creates a uniqueness constraint on the index.",
+        },
+    )
 
     sparse: Optional[bool] = Field(
-        default=False, description="If True, omit from the index any documents that lack the indexed field."
+        default=False,
+        json_schema_extra={
+            "description": "If True, omit from the index any documents that lack the indexed field.",
+        },
     )
 
     background: Optional[bool] = Field(
-        default=True, description="If True, this index should be created in the background."
+        default=True,
+        json_schema_extra={
+            "description": "If True, this index should be created in the background.",
+        },
     )
 
     # Used to create an expiring (TTL) collection.
@@ -40,11 +52,15 @@ class Index(BaseModel):
     # The indexed field must be a UTC datetime or the data will not expire.
     expire_after_seconds: Optional[int] = Field(
         default=0,
-        description="Used to create an expiring (TTL) collection. Documents automatically deleted after <int> seconds.",
+        json_schema_extra={
+            "description": "Used to create an expiring (TTL) collection. Documents automatically deleted after <int> seconds.",
+        },
     )
     ignore_expire_after_seconds: Optional[bool] = Field(
         default=False,
-        description="If True, documents will not expire after <int> seconds.",
+        json_schema_extra={
+            "description": "If True, documents will not expire after <int> seconds.",
+        },
     )
 
     def to_pymongo(self, existing_indexes):

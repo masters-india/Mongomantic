@@ -7,13 +7,18 @@ from datetime import datetime
 
 from bson import ObjectId
 from bson.objectid import InvalidId
-from pydantic import BaseConfig, BaseModel
+from pydantic import ConfigDict, BaseModel
+from pydantic_core import core_schema
 
 
 class OID:
+
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, *args, **kwargs) -> core_schema.CoreSchema:
+        return core_schema.no_info_after_validator_function(
+            cls.validate,
+            core_schema.any_schema(),
+        )
 
     @classmethod
     def validate(cls, v):
@@ -25,14 +30,9 @@ class OID:
 
 class MongoDBModel(BaseModel, ABC):
 
-    id: Optional[OID]
+    id: Optional[OID] = None
 
-    class Config(BaseConfig):
-        allow_population_by_field_name = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-            ObjectId: str,
-        }
+    model_config = ConfigDict(populate_by_name=True, json_encoders={datetime: lambda dt: dt.isoformat(), ObjectId: str})
 
     @classmethod
     def from_mongo(cls, data: Dict[str, Any]) -> Optional[Type["MongoDBModel"]]:
@@ -41,7 +41,7 @@ class MongoDBModel(BaseModel, ABC):
             return None
 
         id = data.pop("_id", None)  # Convert _id into id
-        for k, v in cls.__fields__.items():
+        for k, v in cls.model_fields.items():
             fields_data = str(v).split(" ")
             for e in fields_data:
                 if "Optional[Any]".lower() in e.lower() and "type" in e.lower():
@@ -78,5 +78,4 @@ class MongoDBModel(BaseModel, ABC):
 
         hidden_fields = {"_collection"}
         kwargs.setdefault("exclude", hidden_fields)
-        return super().dict(**kwargs)
-
+        return super().model_dump(**kwargs)
