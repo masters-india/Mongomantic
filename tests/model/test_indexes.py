@@ -27,11 +27,11 @@ def repo():
 def test_index_creation(mongodb, repo):
     indexes = repo._get_collection().index_information()
 
-    assert indexes["email_1"]["unique"]
-    assert indexes["email_1"]["key"] == [("email", 1)]
+    assert indexes["email_index"]["unique"]
+    assert indexes["email_index"]["key"] == [("email", 1)]
 
-    assert indexes["age_1_name_-1"]["unique"]
-    assert indexes["age_1_name_-1"]["key"] == [("age", 1), ("name", -1)]
+    assert indexes["name_age"]["unique"]
+    assert indexes["name_age"]["key"] == [("age", 1), ("name", -1)]
 
 
 def test_index_duplicate_user(mongodb, repo):

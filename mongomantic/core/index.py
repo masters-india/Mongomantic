@@ -65,14 +65,14 @@ class Index(BaseModel):
             pymongo_fields.append((field, direction))
 
         index_dict = {
+            "name": self.name,
             "keys": pymongo_fields,
             "unique": self.unique,
             "background": self.background,
             "sparse": self.sparse,
         }
-        if not self.ignore_expire_after_seconds:
+        if not self.ignore_expire_after_seconds and self.expire_after_seconds > 0 and len(pymongo_fields) == 1:
             index_dict["expireAfterSeconds"] = self.expire_after_seconds
-
         index = IndexModel(**index_dict)
         if index.document.get("name") in existing_indexes:
             # print(f"Index {index.document['name']} already exists. skipping this index")
